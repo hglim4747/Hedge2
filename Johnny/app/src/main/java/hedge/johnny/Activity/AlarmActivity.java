@@ -63,14 +63,14 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
 
                 if( check.getOnOff() )
                 {
-                    HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"0");
+            //        HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"0");
                 }
                 else
                 {
-                    HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"1");
+          //          HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"1");
                 }
 
-                HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
+           //     HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
                 refresh();
             }
         });
@@ -119,14 +119,14 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
         String id = pref.getString("userid", "None");
         String pw = pref.getString("password", "None");
 
-        HedgeHttpClient.GetInstance().AlarmList(id, pw, arrayList, "0");
+       // HedgeHttpClient.GetInstance().AlarmList(id, pw, arrayList, "0");
         for(int i=0; i < arrayList.size(); i++){
             String[] row = arrayList.get(i);
             myarray.add(CreateAlarmWithString(row, "0"));
         }
 
         arrayList = new ArrayList<String[]>();
-        HedgeHttpClient.GetInstance().AlarmList(id, pw, arrayList, "1");
+      //  HedgeHttpClient.GetInstance().AlarmList(id, pw, arrayList, "1");
         for(int i=0; i < arrayList.size(); i++){
             String[] row = arrayList.get(i);
             sendarray.add(CreateAlarmWithString(row, "1"));
@@ -151,7 +151,7 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
                 String pw = pref.getString("password", "None");
                 String alarmid = String.valueOf(index);
                 //서버에 삭제를 요청
-                HedgeHttpClient.GetInstance().DeleteAlarm(id,pw,alarmid);
+             //   HedgeHttpClient.GetInstance().DeleteAlarm(id,pw,alarmid);
                 refresh();
                 //Toast.makeText(getApplicationContext(), (Integer)v.getTag() + " del", Toast.LENGTH_SHORT).show();
                 break;
@@ -189,13 +189,13 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
 
         if( check.getOnOff() )
         {
-            HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"0");
+        //    HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"0");
         }
         else
         {
-            HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"1");
+       //     HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"1");
         }
-        HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
+     //   HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
         refresh();
     }
 }

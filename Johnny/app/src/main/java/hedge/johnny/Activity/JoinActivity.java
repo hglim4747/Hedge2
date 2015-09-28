@@ -11,6 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.regex.Pattern;
 
 import hedge.johnny.HedgeObject.HttpClient.HedgeHttpClient;
@@ -58,23 +61,27 @@ public class JoinActivity extends Activity implements View.OnClickListener {
         if(checkEditText() == false)
             return;
 
-        String[] result;
-        result = HedgeHttpClient.GetInstance().InsertMember(
-                username.getText().toString(),
-                userid.getText().toString(),
-                password.getText().toString(),
-                phonenum.getText().toString()).split(",");
+        String[] result = new String[2];
 
+        // 회원가입
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject, "newname",username.getText().toString());
+        HedgeHttpClient.addValues(jsonObject, "newid",userid.getText().toString());
+        HedgeHttpClient.addValues(jsonObject, "newpassword",password.getText().toString());
+        HedgeHttpClient.addValues(jsonObject, "newphonenum",phonenum.getText().toString());
+        jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("insert_member", jsonObject);
         String msg, tmsg;
-        if(result[0].equals("Success"))
+
+        String code = HedgeHttpClient.getValues(jsonObject, "result");
+        if(code.equals("1"))
         {
             tmsg = "축하합니다!";
-            msg = username.getText().toString()+"님 환영합니다.";
+            msg = HedgeHttpClient.getValues(jsonObject,"username")+"님 환영합니다.";
         }
         else
         {
             tmsg = "가입실패";
-            msg = "입력한 정보를 확인해 주세요.";
+            msg = "네트워크 및 입력한 정보를 확인해주세요";
         }
 
         new AlertDialog.Builder(this)
@@ -135,7 +142,8 @@ public class JoinActivity extends Activity implements View.OnClickListener {
             errorMsg = "아이디는 최소 5자 이상 써야 합니다.";
         else if(password.getText().toString().length() < 5)
             errorMsg = "비밀번호는 최소 5자 이상 써야 합니다.";
-
+        else if(phonenum.getText().toString().length() < 10)
+            errorMsg = "전화번호는 10자리 이상 써야 합니다.";
 
         if(errorMsg != "")
         {

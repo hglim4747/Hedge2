@@ -10,6 +10,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import hedge.johnny.HedgeObject.HttpClient.HedgeHttpClient;
@@ -41,10 +43,17 @@ public class FriendActivity extends NavigationActivity implements AdapterView.On
     public void refresh(){
         array.clear();
 
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
-        HedgeHttpClient.GetInstance().FriendList(id,pw,array);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("friend_list",jsonObject);
+
+        for(int i=0; i<jsonObject.length()-1; i++)
+        {
+            JSONObject iter = HedgeHttpClient.getObject(jsonObject,String.valueOf(i));
+            String[] d = new String[2];
+            d[0] = HedgeHttpClient.getValues(iter,"friendname");
+            d[1] = HedgeHttpClient.getValues(iter,"friendid");
+            array.add(i,d);
+        }
 
         listView.setAdapter(adapter);
     }
@@ -72,10 +81,6 @@ public class FriendActivity extends NavigationActivity implements AdapterView.On
 
     public void btnClick(View v)
     {
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
-
         switch (v.getId())
         {
             case R.id.btn_add:
@@ -88,7 +93,10 @@ public class FriendActivity extends NavigationActivity implements AdapterView.On
             }
                 break;
             case R.id.btn_del:
-                HedgeHttpClient.GetInstance().DeleteFriend(id, pw, v.getTag().toString());
+               // HedgeHttpClient.GetInstance().DeleteFriend(id, pw, v.getTag().toString());
+                JSONObject jsonObject = new JSONObject();
+                HedgeHttpClient.addValues(jsonObject,"friendid",v.getTag().toString());
+                jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("delete_friend",jsonObject);
                 Toast.makeText(getApplicationContext(), v.getTag().toString() + "님과 친구를 끊었습니다.", Toast.LENGTH_LONG).show();
                 refresh();
                 break;

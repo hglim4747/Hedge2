@@ -51,7 +51,7 @@ public class AlarmSetting extends NavigationActivity {
         String pw = pref.getString("password", "None");
 
         ArrayList<String[]> src = new ArrayList<String[]>();
-        HedgeHttpClient.GetInstance().GetAlarmWithAlarmID(id,pw,alarmid,src);
+        //HedgeHttpClient.GetInstance().GetAlarmWithAlarmID(id,pw,alarmid,src);
         String[] row = src.get(0);
         if(row[0].equals("Deleted") == true)
         {
@@ -217,15 +217,15 @@ public class AlarmSetting extends NavigationActivity {
 
         if(modify){
             alarmid = getIntent().getExtras().getString("alarmid");
-            HedgeHttpClient.GetInstance().ModifyAlarm(id, pw, hour, min, day, weather, alarm_type, on_off, repeat, mTitle, alarmid);
+           // HedgeHttpClient.GetInstance().ModifyAlarm(id, pw, hour, min, day, weather, alarm_type, on_off, repeat, mTitle, alarmid);
             alarmid_int = Integer.parseInt(alarmid);
-            HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "2"); //변경 로그 저장\
+           // HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "2"); //변경 로그 저장\
         }
         else{
-            alarmid = HedgeHttpClient.GetInstance().InsertAlarm(id, pw, hour, min, day, weather, alarm_type, on_off,
-                    repeat, fromid, toid, mTitle);
+         //   alarmid = HedgeHttpClient.GetInstance().InsertAlarm(id, pw, hour, min, day, weather, alarm_type, on_off,
+         //           repeat, fromid, toid, mTitle);
             alarmid_int = Integer.parseInt(alarmid);
-            HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "1"); //변경 로그 저장\
+         //   HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "1"); //변경 로그 저장\
         }
 
         return alarmid_int;

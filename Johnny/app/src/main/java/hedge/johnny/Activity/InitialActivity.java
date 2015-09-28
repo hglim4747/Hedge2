@@ -6,6 +6,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,20 +32,22 @@ public class InitialActivity extends Activity {
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                String result[] = new String[2];
                 SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-                String id = pref.getString("userid", "None");
-                String pw = pref.getString("password", "None");
+                String id = pref.getString("userid", "");
+                String pw = pref.getString("password", "");
+                HedgeHttpClient.GetInstance().SetAccount(id,pw);
 
                 //if(true)
-                if(id.equals("None")==false && pw.equals("None")==false) //  저장된 아이디가 있음
+                if(id.equals("")==false && pw.equals("")==false) //  저장된 아이디가 있음
                 {
-                    result = HedgeHttpClient.GetInstance().EnsureMember(id, pw).split(","); // 로그인시도
-                    if(result[0].equals("None")==false && result[0].equals("None")==false) // 저장된 아이디가 로그인에 성공하면 메인액티비티로
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("ensure_member", jsonObject);
+
+                    if(HedgeHttpClient.getValues(jsonObject,"result").equals("1")) // 저장된 아이디가 로그인에 성공하면 메인액티비티로
                     {
                         SharedPreferences.Editor edit = pref.edit();
-                        edit.putString("username", result[0]);
-                        edit.putString("phonenum", result[1]);
+                        edit.putString("username", HedgeHttpClient.getValues(jsonObject, "username"));
+                        edit.putString("phonenum", HedgeHttpClient.getValues(jsonObject, "phonenum"));
                         edit.commit();
                         Intent i = new Intent(InitialActivity.this, MainActivity.class);
                         startActivity(i);
@@ -58,6 +63,7 @@ public class InitialActivity extends Activity {
                         startActivity(i);
                         finish(); return;
                     }
+
                 }
                 else // 저장된 아이디가 없으면 로그인시도
                 {

@@ -36,7 +36,7 @@ public class HedgeAlarmService extends Service {
         String pw = pref.getString("password", "None");
 
         ArrayList<String[]> src = new ArrayList<String[]>();
-        HedgeHttpClient.GetInstance().GetAlarmWithAlarmID(id, pw, alarmid, src);
+       // HedgeHttpClient.GetInstance().GetAlarmWithAlarmID(id, pw, alarmid, src);
 
         if(src.get(0)[0].equals("Deleted") == true)
             return START_NOT_STICKY;

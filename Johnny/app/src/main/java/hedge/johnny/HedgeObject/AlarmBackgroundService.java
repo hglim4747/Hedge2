@@ -51,7 +51,7 @@ public class AlarmBackgroundService extends Service implements Runnable{
         String pw = pref.getString("password", "None");
 
         ArrayList<String[]> alarmUpdateList = new ArrayList<String[]>();
-        HedgeHttpClient.GetInstance().AlarmUpdateList(id,pw,alarmUpdateList);
+       // HedgeHttpClient.GetInstance().AlarmUpdateList(id,pw,alarmUpdateList);
 
         for(int i=0; i<alarmUpdateList.size(); i++)
         {
@@ -61,7 +61,7 @@ public class AlarmBackgroundService extends Service implements Runnable{
             String alarmid = row[2]; // 알람의 id
 
             ArrayList<String[]> src = new ArrayList<String[]>();
-            HedgeHttpClient.GetInstance().PopAlarmWithAlarmID(id,pw,alarmid,src);
+           // HedgeHttpClient.GetInstance().PopAlarmWithAlarmID(id,pw,alarmid,src);
             String[] alarminfo = src.get(0);
 
             if(alarminfo[0].equals("Deleted"))

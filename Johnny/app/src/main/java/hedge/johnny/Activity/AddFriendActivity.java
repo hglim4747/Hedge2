@@ -18,6 +18,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.http.client.HttpClient;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import hedge.johnny.HedgeObject.HttpClient.HedgeHttpClient;
@@ -73,8 +77,31 @@ public class AddFriendActivity extends NavigationActivity implements OnClickList
         SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
         String id = pref.getString("userid", "None");
         String pw = pref.getString("password", "None");
-        HedgeHttpClient.GetInstance().FriendRequestList(id, pw, "1", to_him);
-        HedgeHttpClient.GetInstance().FriendRequestList(id, pw, "0", to_me);
+
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject, "sended", "1");
+        JSONObject sended = HedgeHttpClient.HedgeRequest("friend_request_list",jsonObject);
+        jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"sended","0");
+        JSONObject receieved = HedgeHttpClient.HedgeRequest("friend_request_list",jsonObject);
+
+        for(int i=0; i<sended.length()-1; i++)
+        {
+            JSONObject iter = HedgeHttpClient.getObject(sended,String.valueOf(i));
+            String[] d = new String[2];
+            d[0] = HedgeHttpClient.getValues(iter,"friendname");
+            d[1] = HedgeHttpClient.getValues(iter,"friendid");
+            to_him.add(i,d);
+        }
+
+        for(int i=0; i<receieved.length()-1; i++)
+        {
+            JSONObject iter = HedgeHttpClient.getObject(receieved,String.valueOf(i));
+            String[] d = new String[2];
+            d[0] = HedgeHttpClient.getValues(iter,"friendname");
+            d[1] = HedgeHttpClient.getValues(iter,"friendid");
+            to_me.add(i,d);
+        }
 
         list1.setAdapter(adapter1);
         list2.setAdapter(adapter2);
@@ -82,30 +109,32 @@ public class AddFriendActivity extends NavigationActivity implements OnClickList
 
     private void RequestFriend()
     {
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
-        HedgeHttpClient.RequestFriend(id,pw,friend_id.getText().toString());
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"friendid",friend_id.getText().toString());
+        jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("request_friend",jsonObject);
 
         EditText a = (EditText)findViewById(R.id.friend_id);
         a.setText("");
     }
 
     public void btnClickAddFriend(View v){
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
+        JSONObject jsonObject;
         switch (v.getId()){
             case R.id.btn_cancel:
                 //취소 버튼
-                HedgeHttpClient.GetInstance().DeleteFriend(id, pw, v.getTag().toString());
+                jsonObject = new JSONObject();
+                HedgeHttpClient.addValues(jsonObject,"friendid",v.getTag().toString());
+                jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("delete_friend",jsonObject);
                 Toast.makeText(getApplicationContext(), v.getTag().toString() + "님께 보낸 친구요청을 취소했습니다.", Toast.LENGTH_LONG).show();
                 refresh();
                 break;
             case R.id.btn_accept:
                 //수락버튼
                 String friendid = (String) v.getTag();
-                HedgeHttpClient.AcceptFriend(id, pw, friendid);
+               // HedgeHttpClient.AcceptFriend(id, pw, friendid);
+                jsonObject = new JSONObject();
+                HedgeHttpClient.addValues(jsonObject,"friendid",friendid);
+                jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("accept_friend",jsonObject);
                 refresh();
                 break;
         }
@@ -113,15 +142,18 @@ public class AddFriendActivity extends NavigationActivity implements OnClickList
 
     @Override
     public void onClick(View v) {
+       // result = HedgeHttpClient.GetInstance().FindMember(friend_id.getText().toString()).split(",");
 
-        String[] result = new String[2];
-        result = HedgeHttpClient.GetInstance().FindMember(friend_id.getText().toString()).split(",");
+        JSONObject jsonObject = new JSONObject();
+        String memberid = friend_id.getText().toString();
+        HedgeHttpClient.addValues(jsonObject, "memberid", memberid);
+        JSONObject result = HedgeHttpClient.GetInstance().HedgeRequest("find_member",jsonObject);
 
-        if(result[0] != "Exception" && result[0] != "None" && result[0] != "")
+        if(HedgeHttpClient.getValues(result,"result").equals("1"))
         {
             new AlertDialog.Builder(MainActivity.MainContext)
                     .setTitle("확인")
-                    .setMessage("이름 : "+ result[0] + "\n위 정보와 일치합니까?")
+                    .setMessage("이름 : " + HedgeHttpClient.getValues(result,"username") + "\n위 정보와 일치합니까?")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             RequestFriend();
@@ -149,6 +181,7 @@ public class AddFriendActivity extends NavigationActivity implements OnClickList
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
         }
+
     }
 }
 

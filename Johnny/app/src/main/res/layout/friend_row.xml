@@ -17,11 +17,20 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="right">
+        
+        <ImageButton
+            android:id="@+id/btn_msg"
+            android:src="@drawable/friend_msg"
+            android:background="#00ffffff"
+            android:onClick="btnClick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
         <ImageButton
             android:id="@+id/btn_modify"
             android:src="@drawable/friend_modify"
             android:background="#00ffffff"
+            android:paddingLeft="5dp"
             android:onClick="btnClick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -30,7 +39,7 @@
             android:id="@+id/btn_del"
             android:src="@drawable/friend_del"
             android:background="#00ffffff"
-            android:paddingLeft="15dp"
+            android:paddingLeft="5dp"
             android:onClick="btnClick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />

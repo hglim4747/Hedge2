@@ -1,7 +1,6 @@
 package hedge.johnny.Activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -21,7 +20,7 @@ import hedge.johnny.R;
 /**
  * Created by Administrator on 2015-07-21.
  */
-public class FriendActivity extends NavigationActivity implements AdapterView.OnItemClickListener {
+public class FriendActivity extends NavigationActivity implements AdapterView.OnItemClickListener{
 
     FriendAdapter adapter;
     ArrayList<String[]> array;
@@ -36,7 +35,6 @@ public class FriendActivity extends NavigationActivity implements AdapterView.On
         setContentView(R.layout.activity_friend);
 
         init();
-
         refresh();
     }
 
@@ -101,14 +99,17 @@ public class FriendActivity extends NavigationActivity implements AdapterView.On
                 refresh();
                 break;
             case R.id.btn_modify:
-            {
                 Intent intent = new Intent(FriendActivity.this, SendAlarmActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 //intent.putExtra("friend_id", v.getTag().toString());
                 tag = v.getTag().toString();
                 goNextHistory("SendAlarmActivity", intent);
                 //Toast.makeText(getApplicationContext(), (Integer)v.getTag() + " mod", Toast.LENGTH_SHORT).show();
-            }
+                break;
+            case R.id.btn_msg:
+                // 친구에게 메세지 보내기
+                MyDialog dlg = new MyDialog(v.getTag().toString());                  // dialog 호출
+                dlg.show(getParent().getFragmentManager(), "alert");
                 break;
             default:
                 break;

@@ -79,6 +79,11 @@
             android:label="@string/title_activity_join"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".Activity.PermissionActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"/>
+
         <service
             android:name=".HedgeObject.HedgeAlarmService"
             android:enabled="true" >

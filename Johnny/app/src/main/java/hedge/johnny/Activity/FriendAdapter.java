@@ -43,10 +43,12 @@ public class FriendAdapter extends ArrayAdapter<String[]>{
             }
         }
 
+        ImageButton btnMsg = (ImageButton) v.findViewById(R.id.btn_msg);
         ImageButton btnModi = (ImageButton) v.findViewById(R.id.btn_modify);
         ImageButton btnDel = (ImageButton) v.findViewById(R.id.btn_del);
 
         v.setTag(p[1]);
+        btnMsg.setTag(p[1]);
         btnModi.setTag(p[1]);
         btnDel.setTag(p[1]);
 

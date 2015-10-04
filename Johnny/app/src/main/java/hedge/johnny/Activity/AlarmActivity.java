@@ -21,7 +21,7 @@ import hedge.johnny.R;
 /**
  * Created by Administrator on 2015-07-21.
  */
-public class AlarmActivity extends NavigationActivity implements AdapterView.OnItemClickListener {
+public class AlarmActivity extends NavigationActivity {
     private ListView mMyListView = null, mSendListView = null;
     private AlarmAdapter mMyAdapter = null, mSendAdapter = null;
     private ArrayList<Alarm> myarray, sendarray;
@@ -51,31 +51,43 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
         mSendAdapter = new AlarmAdapter(this, R.layout.alarm_row, sendarray);
 
         // 클릭 리스너
-        mMyListView.setOnItemClickListener(this);
+        mMyListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String db_id = view.getTag().toString();
+                onoffset(db_id, myarray, position);
+            }
+        });
+
         mSendListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String db_id = view.getTag().toString();
-                //_id값으로 db에 접속해서 off상태로 만들어
-
-                Alarm check = sendarray.get(position);
-                SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-                String userid = pref.getString("userid", "None");
-                String pw = pref.getString("password", "None");
-
-                if( check.getOnOff() )
-                {
-            //        HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"0");
-                }
-                else
-                {
-          //          HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"1");
-                }
-
-           //     HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
-                refresh();
+                onoffset(db_id, sendarray, position);
             }
         });
+    }
+
+    public void onoffset(String alarmid, ArrayList<Alarm> array, int position)
+    {
+        Alarm alarm = array.get(position);
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"alarmid",alarmid);
+
+        if( alarm.getOnOff() )
+        {
+            HedgeHttpClient.addValues(jsonObject,"on_off","0");
+            jsonObject = HedgeHttpClient.HedgeRequest("onoff_alarm",jsonObject);
+        }
+        else
+        {
+            HedgeHttpClient.addValues(jsonObject,"on_off","1");
+            jsonObject = HedgeHttpClient.HedgeRequest("onoff_alarm",jsonObject);
+        }
+
+        // HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
+        // 업데이트 리스트
+        refresh();
     }
 
     public void refresh(){
@@ -116,9 +128,7 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
     }
 
     private void fillMyAlarmArray(){
-        JSONObject jsonObject = new JSONObject();
-        HedgeHttpClient.addValues(jsonObject,"sended","0");
-        jsonObject = HedgeHttpClient.HedgeRequest("alarm_list",jsonObject);
+        JSONObject jsonObject = HedgeHttpClient.HedgeRequest("alarm_list",new JSONObject());
         if(HedgeHttpClient.getValues(jsonObject,"result").equals("1") == false)
         {
             //error
@@ -140,29 +150,11 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
             p[8] = HedgeHttpClient.getValues(row,"fromid");
             p[9] = HedgeHttpClient.getValues(row,"toid");
             p[10] = HedgeHttpClient.getValues(row,"title");
-            myarray.add(CreateAlarmWithString(p, "0"));
-        }
 
-        jsonObject = new JSONObject();
-        HedgeHttpClient.addValues(jsonObject,"sended","1");
-        jsonObject = HedgeHttpClient.HedgeRequest("alarm_list",jsonObject);
-
-        for(int i=0; i<jsonObject.length()-1; i++)
-        {
-            JSONObject row = HedgeHttpClient.getObject(jsonObject,String.valueOf(i));
-            String[] p = new String[11];
-            p[0] = HedgeHttpClient.getValues(row,"id");
-            p[1] = HedgeHttpClient.getValues(row,"hour");
-            p[2] = HedgeHttpClient.getValues(row,"min");
-            p[3] = HedgeHttpClient.getValues(row,"day");
-            p[4] = HedgeHttpClient.getValues(row,"weather");
-            p[5] = HedgeHttpClient.getValues(row,"alarm_type");
-            p[6] = HedgeHttpClient.getValues(row,"on_off");
-            p[7] = HedgeHttpClient.getValues(row,"repeating");
-            p[8] = HedgeHttpClient.getValues(row,"fromid");
-            p[9] = HedgeHttpClient.getValues(row,"toid");
-            p[10] = HedgeHttpClient.getValues(row,"title");
-            sendarray.add(CreateAlarmWithString(p, "1"));
+            if(HedgeHttpClient.getValues(row,"sended").equals("0"))
+                myarray.add(CreateAlarmWithString(p,"0"));
+            else
+                sendarray.add(CreateAlarmWithString(p,"1"));
         }
 
     }
@@ -205,34 +197,5 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
             default:
                 break;
         }
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-        // 리스트를 터치하면 토스트를 띄운다.
-        //Toast.makeText(getApplicationContext(), position + "번째 리스트 클릭", Toast.LENGTH_SHORT).show();
-
-        //그 몇번째 아이템을 불러와서 _id값을 가져와
-        String db_id = view.getTag().toString();
-        //_id값으로 db에 접속해서 off상태로 만들어
-
-        Alarm check = myarray.get(position);
-        JSONObject jsonObject = new JSONObject();
-        HedgeHttpClient.addValues(jsonObject,"alarmid",db_id);
-
-        if( check.getOnOff() )
-        {
-            HedgeHttpClient.addValues(jsonObject,"on_off","0");
-            jsonObject = HedgeHttpClient.HedgeRequest("onoff_alarm",jsonObject);
-        }
-        else
-        {
-            HedgeHttpClient.addValues(jsonObject,"on_off","1");
-            jsonObject = HedgeHttpClient.HedgeRequest("onoff_alarm",jsonObject);
-        }
-
-        // HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
-        // 업데이트 리스트
-        refresh();
     }
 }

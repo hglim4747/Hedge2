@@ -1,5 +1,8 @@
 package hedge.johnny.HedgeObject.HttpClient;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 
 import org.apache.http.HttpResponse;
@@ -104,8 +107,10 @@ public class HedgeHttpClient {
         }
 
         t.execute(jsonObject);
+
         return GetResult(t);
     }
+
 }
 
 class RequestT extends AsyncTask<JSONObject, Void, JSONObject>{
@@ -119,7 +124,9 @@ class RequestT extends AsyncTask<JSONObject, Void, JSONObject>{
         String result = "";
 
         try {
+//            String url = "http://1.231.69.29:5000/" + jsonObject.getString("func");
             String url = "http://hglim.me:2025/" + jsonObject.getString("func");
+
             HttpPost httppost = new HttpPost(url);
 
             StringEntity se = new StringEntity(jsonObject.toString(), HTTP.UTF_8);

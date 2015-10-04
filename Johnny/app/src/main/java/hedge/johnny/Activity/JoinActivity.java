@@ -73,6 +73,7 @@ public class JoinActivity extends Activity implements View.OnClickListener {
         String msg, tmsg;
 
         String code = HedgeHttpClient.getValues(jsonObject, "result");
+
         if(code.equals("1"))
         {
             tmsg = "축하합니다!";

@@ -7,6 +7,8 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,14 +48,13 @@ public class AlarmSetting extends NavigationActivity {
 
     protected void setTextWithData(){
         String alarmid = AlarmActivity.tag;
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
 
-        ArrayList<String[]> src = new ArrayList<String[]>();
         //HedgeHttpClient.GetInstance().GetAlarmWithAlarmID(id,pw,alarmid,src);
-        String[] row = src.get(0);
-        if(row[0].equals("Deleted") == true)
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"alarmid",alarmid);
+        jsonObject = HedgeHttpClient.HedgeRequest("get_alarm_with_alarmid",jsonObject);
+
+        if(HedgeHttpClient.getValues(jsonObject,"result").equals("1") == false)
         {
             exit = true;
             Toast.makeText(getApplicationContext(), "존재하지 않는 알람입니다.", Toast.LENGTH_LONG).show();
@@ -64,7 +65,7 @@ public class AlarmSetting extends NavigationActivity {
         hour = (EditText)findViewById(R.id.hour_add_alarm);
         minute = (EditText)findViewById(R.id.minute_add_alarm);
 
-        int ind = Integer.parseInt(row[1]);
+        int ind = Integer.parseInt(HedgeHttpClient.getValues(jsonObject,"hour"));
 
         if(ind >= 12){
             hour.setText(String.valueOf(ind - 12));
@@ -73,11 +74,11 @@ public class AlarmSetting extends NavigationActivity {
         }
         else
             hour.setText(String.valueOf(ind));
-        minute.setText(row[2]);
+        minute.setText(HedgeHttpClient.getValues(jsonObject,"min"));
 
         //요일
         CheckBox day;
-        int d = Integer.parseInt(row[3]);
+        int d = Integer.parseInt(HedgeHttpClient.getValues(jsonObject,"day"));
         for(int i = 6; i >= 0; i--){
             int sid = getResources().getIdentifier("@id/day" + (i + 1) + "_add_alarm", "id", this.getPackageName());
             day = (CheckBox) findViewById(sid);
@@ -88,10 +89,10 @@ public class AlarmSetting extends NavigationActivity {
 
         //날씨 알람
         CheckBox weather_quiz = (CheckBox)findViewById(R.id.weather_add_alarm);
-        weather_quiz.setChecked(row[4].equals("1"));
+        weather_quiz.setChecked(HedgeHttpClient.getValues(jsonObject,"weather").equals("true"));
 
         //알람 타입
-        String type = row[5];
+        String type = HedgeHttpClient.getValues(jsonObject,"alarm_type");
         RadioButton alarm_type;
         if(type.equals("1"))
             alarm_type = (RadioButton) findViewById(R.id.sound_add_alarm);
@@ -103,7 +104,7 @@ public class AlarmSetting extends NavigationActivity {
 
         //반복 알람
         CheckBox alarm_repeat = (CheckBox)findViewById(R.id.repeat_add_alarm);
-        alarm_repeat.setChecked(row[7].equals("1"));
+        alarm_repeat.setChecked(HedgeHttpClient.getValues(jsonObject,"repeating").equals("true"));
     }
 
     protected void setTextWithNow(){
@@ -215,19 +216,37 @@ public class AlarmSetting extends NavigationActivity {
         String alarmid = "";
         int alarmid_int;
 
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"hour",hour);
+        HedgeHttpClient.addValues(jsonObject,"min",min);
+        HedgeHttpClient.addValues(jsonObject,"day",day);
+        HedgeHttpClient.addValues(jsonObject,"weather",weather);
+        HedgeHttpClient.addValues(jsonObject,"alarm_type",alarm_type);
+        HedgeHttpClient.addValues(jsonObject,"on_off",on_off);
+        HedgeHttpClient.addValues(jsonObject,"repeating",repeat);
+        HedgeHttpClient.addValues(jsonObject,"title",mTitle);
+
         if(modify){
             alarmid = getIntent().getExtras().getString("alarmid");
            // HedgeHttpClient.GetInstance().ModifyAlarm(id, pw, hour, min, day, weather, alarm_type, on_off, repeat, mTitle, alarmid);
+
+            HedgeHttpClient.addValues(jsonObject,"alarmid",alarmid);
+            jsonObject = HedgeHttpClient.HedgeRequest("modify_alarm",jsonObject);
+
             alarmid_int = Integer.parseInt(alarmid);
            // HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "2"); //변경 로그 저장\
         }
         else{
          //   alarmid = HedgeHttpClient.GetInstance().InsertAlarm(id, pw, hour, min, day, weather, alarm_type, on_off,
          //           repeat, fromid, toid, mTitle);
+            HedgeHttpClient.addValues(jsonObject,"fromid",fromid);
+            HedgeHttpClient.addValues(jsonObject,"toid",toid);
+            jsonObject = HedgeHttpClient.HedgeRequest("insert_alarm",jsonObject);
+
+            alarmid = HedgeHttpClient.getValues(jsonObject,"alarmid");
             alarmid_int = Integer.parseInt(alarmid);
          //   HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "1"); //변경 로그 저장\
         }
-
         return alarmid_int;
     }
 }

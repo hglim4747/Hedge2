@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import hedge.johnny.HedgeObject.HttpClient.HedgeHttpClient;
@@ -102,10 +104,10 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
             dayinfo /= 10;
         }
 
-        boolean weather = row[4].equals("1");
+        boolean weather = row[4].equals("true");
         int alarm_type = Integer.parseInt(row[5]);
-        boolean onoff = row[6].equals("1");
-        boolean repeat = row[7].equals("1");
+        boolean onoff = row[6].equals("true");
+        boolean repeat = row[7].equals("true");
         String sender = row[8];
         String receiver = row[9];
         String title = row[10];
@@ -114,23 +116,55 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
     }
 
     private void fillMyAlarmArray(){
-        ArrayList<String[]> arrayList = new ArrayList<String[]>();
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
-
-       // HedgeHttpClient.GetInstance().AlarmList(id, pw, arrayList, "0");
-        for(int i=0; i < arrayList.size(); i++){
-            String[] row = arrayList.get(i);
-            myarray.add(CreateAlarmWithString(row, "0"));
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"sended","0");
+        jsonObject = HedgeHttpClient.HedgeRequest("alarm_list",jsonObject);
+        if(HedgeHttpClient.getValues(jsonObject,"result").equals("1") == false)
+        {
+            //error
+            return;
         }
 
-        arrayList = new ArrayList<String[]>();
-      //  HedgeHttpClient.GetInstance().AlarmList(id, pw, arrayList, "1");
-        for(int i=0; i < arrayList.size(); i++){
-            String[] row = arrayList.get(i);
-            sendarray.add(CreateAlarmWithString(row, "1"));
+        for(int i=0; i<jsonObject.length()-1; i++)
+        {
+            JSONObject row = HedgeHttpClient.getObject(jsonObject,String.valueOf(i));
+            String[] p = new String[11];
+            p[0] = HedgeHttpClient.getValues(row,"id");
+            p[1] = HedgeHttpClient.getValues(row,"hour");
+            p[2] = HedgeHttpClient.getValues(row,"min");
+            p[3] = HedgeHttpClient.getValues(row,"day");
+            p[4] = HedgeHttpClient.getValues(row,"weather");
+            p[5] = HedgeHttpClient.getValues(row,"alarm_type");
+            p[6] = HedgeHttpClient.getValues(row,"on_off");
+            p[7] = HedgeHttpClient.getValues(row,"repeating");
+            p[8] = HedgeHttpClient.getValues(row,"fromid");
+            p[9] = HedgeHttpClient.getValues(row,"toid");
+            p[10] = HedgeHttpClient.getValues(row,"title");
+            myarray.add(CreateAlarmWithString(p, "0"));
         }
+
+        jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"sended","1");
+        jsonObject = HedgeHttpClient.HedgeRequest("alarm_list",jsonObject);
+
+        for(int i=0; i<jsonObject.length()-1; i++)
+        {
+            JSONObject row = HedgeHttpClient.getObject(jsonObject,String.valueOf(i));
+            String[] p = new String[11];
+            p[0] = HedgeHttpClient.getValues(row,"id");
+            p[1] = HedgeHttpClient.getValues(row,"hour");
+            p[2] = HedgeHttpClient.getValues(row,"min");
+            p[3] = HedgeHttpClient.getValues(row,"day");
+            p[4] = HedgeHttpClient.getValues(row,"weather");
+            p[5] = HedgeHttpClient.getValues(row,"alarm_type");
+            p[6] = HedgeHttpClient.getValues(row,"on_off");
+            p[7] = HedgeHttpClient.getValues(row,"repeating");
+            p[8] = HedgeHttpClient.getValues(row,"fromid");
+            p[9] = HedgeHttpClient.getValues(row,"toid");
+            p[10] = HedgeHttpClient.getValues(row,"title");
+            sendarray.add(CreateAlarmWithString(p, "1"));
+        }
+
     }
 
     public void btnClickAlarm(View v) {
@@ -146,12 +180,13 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
             case R.id.btn_del:
             {
                 int index = (Integer)v.getTag();
-                SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-                String id = pref.getString("userid", "None");
-                String pw = pref.getString("password", "None");
                 String alarmid = String.valueOf(index);
                 //서버에 삭제를 요청
-             //   HedgeHttpClient.GetInstance().DeleteAlarm(id,pw,alarmid);
+                // HedgeHttpClient.GetInstance().DeleteAlarm(id,pw,alarmid);
+                JSONObject jsonObject = new JSONObject();
+                HedgeHttpClient.addValues(jsonObject,"on_off","1");
+                HedgeHttpClient.addValues(jsonObject,"alarmid",alarmid);
+                jsonObject = HedgeHttpClient.HedgeRequest("delete_alarm",jsonObject);
                 refresh();
                 //Toast.makeText(getApplicationContext(), (Integer)v.getTag() + " del", Toast.LENGTH_SHORT).show();
                 break;
@@ -172,7 +207,6 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
         }
     }
 
-
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         // 리스트를 터치하면 토스트를 띄운다.
@@ -183,19 +217,22 @@ public class AlarmActivity extends NavigationActivity implements AdapterView.OnI
         //_id값으로 db에 접속해서 off상태로 만들어
 
         Alarm check = myarray.get(position);
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String userid = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
+        JSONObject jsonObject = new JSONObject();
+        HedgeHttpClient.addValues(jsonObject,"alarmid",db_id);
 
         if( check.getOnOff() )
         {
-        //    HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"0");
+            HedgeHttpClient.addValues(jsonObject,"on_off","0");
+            jsonObject = HedgeHttpClient.HedgeRequest("onoff_alarm",jsonObject);
         }
         else
         {
-       //     HedgeHttpClient.GetInstance().OnOffAlarm(userid,pw,db_id,"1");
+            HedgeHttpClient.addValues(jsonObject,"on_off","1");
+            jsonObject = HedgeHttpClient.HedgeRequest("onoff_alarm",jsonObject);
         }
-     //   HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
+
+        // HedgeHttpClient.GetInstance().InsertAlarmUpdate(userid,pw,userid,db_id,"2");
+        // 업데이트 리스트
         refresh();
     }
 }

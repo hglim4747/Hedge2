@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -46,40 +48,49 @@ public class AlarmBackgroundService extends Service implements Runnable{
     }
 
     private void checkChanges(){
-        SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
-        String id = pref.getString("userid", "None");
-        String pw = pref.getString("password", "None");
+        try {
+            SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
+            String id = pref.getString("userid", "None");
+            String pw = pref.getString("password", "None");
+            HedgeHttpClient.GetInstance().SetAccount(id, pw);
 
-        ArrayList<String[]> alarmUpdateList = new ArrayList<String[]>();
-       // HedgeHttpClient.GetInstance().AlarmUpdateList(id,pw,alarmUpdateList);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject = HedgeHttpClient.HedgeRequest("ensure_member", jsonObject);
+            if (HedgeHttpClient.getValues(jsonObject, "result").equals("1") == false) return;
 
-        for(int i=0; i<alarmUpdateList.size(); i++)
-        {
-            String[] row = alarmUpdateList.get(i);
-            String modifier = row[0]; // 수정자 (아직 안쓰임)
-            String owner = row[1]; // 알람을 받은 사람 (백그라운드 업데이트가 필요한 유저)
-            String alarmid = row[2]; // 알람의 id
+            jsonObject = new JSONObject();
+             jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("alarm_update_list", jsonObject);
+            // HedgeHttpClient.GetInstance().AlarmUpdateList(id,pw,alarmUpdateList);
 
-            ArrayList<String[]> src = new ArrayList<String[]>();
-           // HedgeHttpClient.GetInstance().PopAlarmWithAlarmID(id,pw,alarmid,src);
-            String[] alarminfo = src.get(0);
+            for (int i = 0; i < jsonObject.length() - 1; i++) {
+                JSONObject row = HedgeHttpClient.getObject(jsonObject, String.valueOf(i));
+                String modifier = HedgeHttpClient.getValues(row, "modifier"); // 수정자 (아직 안쓰임)
+                String owner = HedgeHttpClient.getValues(row, "ownerid"); // 알람을 받은 사람 (백그라운드 업데이트가 필요한 유저)
+                String alarmid = HedgeHttpClient.getValues(row, "alarmid");  // 알람의 id
+                String state = HedgeHttpClient.getValues(row, "state");
 
-            if(alarminfo[0].equals("Deleted"))
-            {
-                cancelAlarm(Integer.parseInt(alarmid));
+                if (state.equals("3")) {
+                    cancelAlarm(Integer.parseInt(alarmid));
+                } else if (state.equals("2")) {
+                    cancelAlarm(Integer.parseInt(alarmid));
+                    JSONObject alarmJson = HedgeHttpClient.getObject(row, "alarm");
+                    setAlarm(alarmJson, alarmid);
+                } else {
+                    JSONObject alarmJson = HedgeHttpClient.getObject(row, "alarm");
+                    setAlarm(alarmJson, alarmid);
+                }
+                Log.e("Thread Running : " + alarmid + "알람매니저와 동기화시키기", "ok");
             }
-            else if(alarminfo[3].equals("2"))
-            {
-                cancelAlarm(Integer.parseInt(alarmid));
-                setAlarm(alarminfo, alarmid);
-            }
-            else
-            {
-                setAlarm(alarminfo, alarmid);
-            }
-
-            Log.e("Thread Running : " + alarmid + "알람매니저와 동기화시키기", "ok");
         }
+        catch (Exception e)
+        {
+            Log.e("Thread Running : " + e.toString(), "error");
+        }
+        finally {
+            JSONObject jsonObject = new JSONObject();
+            HedgeHttpClient.HedgeRequest("clear_alarm_update", jsonObject);
+        }
+
     }
 
     private void cancelAlarm(int alarmId){
@@ -88,11 +99,11 @@ public class AlarmBackgroundService extends Service implements Runnable{
         alarm.cancel(pender);
     }
 
-    private void setAlarm(String[] alarminfo, String alarmId){
+    private void setAlarm(JSONObject alarminfo, String alarmId){
         Intent intent = new Intent(this, HedgeAlarmService.class);
-        intent.putExtra("repeat", alarminfo[7]);    //intent에 요일 on/off정보를 넣음.
-        intent.putExtra("weather_alarm", alarminfo[4]);
-        intent.putExtra("alarm_type", alarminfo[5]);
+        intent.putExtra("repeat", HedgeHttpClient.getValues(alarminfo,"repeating"));    //intent에 요일 on/off정보를 넣음.
+        intent.putExtra("weather_alarm",HedgeHttpClient.getValues(alarminfo,"weather"));
+        intent.putExtra("alarm_type", HedgeHttpClient.getValues(alarminfo,"alarm_type"));
         intent.putExtra("db_id", alarmId);
 
         PendingIntent pender = PendingIntent.getService(this, Integer.parseInt(alarmId), intent, 0);
@@ -105,8 +116,8 @@ public class AlarmBackgroundService extends Service implements Runnable{
         long cTime = current.getTimeInMillis(); //currentTime = cTime
 
         Calendar target = Calendar.getInstance();
-        target.set(Calendar.HOUR_OF_DAY, Integer.parseInt(alarminfo[1]));
-        target.set(Calendar.MINUTE, Integer.parseInt(alarminfo[2]));
+        target.set(Calendar.HOUR_OF_DAY, Integer.parseInt(HedgeHttpClient.getValues(alarminfo,"hour")));
+        target.set(Calendar.MINUTE, Integer.parseInt(HedgeHttpClient.getValues(alarminfo,"min")));
         target.set(Calendar.SECOND, 0);
         target.set(Calendar.MILLISECOND, 0);
         long tTime = target.getTimeInMillis();  //targetTime = tTime

@@ -38,8 +38,8 @@ public class PermissionActivity extends Activity implements View.OnClickListener
 
         // 알람 금지를 켰는지 껐는지 서버와 통신해서 셋팅
         pref = getSharedPreferences("HedgeMembers", 0);
-        startBtn.setText(pref.getString("permission_start", ""));       // 시작시간 불러옴
-        endBtn.setText(pref.getString("permission_end", ""));           // 종료시간 불러옴
+        startBtn.setText(pref.getString("permission_start", "PM 12:00"));       // 시작시간 불러옴
+        endBtn.setText(pref.getString("permission_end", "PM 6:00"));           // 종료시간 불러옴
         if(pref.getString("permission_onoff", "") == "on")              // onoff 유무 불러옴
             tgBtn.setChecked(true);
         else

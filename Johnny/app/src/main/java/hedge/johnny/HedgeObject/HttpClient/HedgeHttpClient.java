@@ -116,8 +116,8 @@ class RequestT extends AsyncTask<JSONObject, Void, JSONObject>{
         String result = "";
 
         try {
-            String url = "http://1.231.69.29:5000/" + jsonObject.getString("func");
-//            String url = "http://hglim.me:2025/" + jsonObject.getString("func");
+            //String url = "http://1.231.69.29:5000/" + jsonObject.getString("func");
+            String url = "http://hglim.me:2025/" + jsonObject.getString("func");
 
             HttpPost httppost = new HttpPost(url);
 

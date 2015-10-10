@@ -119,6 +119,9 @@ public class InitialActivity extends Activity {
 
                 //토큰값이 들어옴 이걸 서버로 보냄
                 String token = intent.getStringExtra("token");
+                JSONObject jsonObject = new JSONObject();
+                HedgeHttpClient.addValues(jsonObject,"devicekey", token);
+                jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("set_device_key",jsonObject);
             }
         };
 

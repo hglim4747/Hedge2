@@ -231,10 +231,14 @@ public class AlarmSetting extends NavigationActivity {
            // HedgeHttpClient.GetInstance().ModifyAlarm(id, pw, hour, min, day, weather, alarm_type, on_off, repeat, mTitle, alarmid);
 
             HedgeHttpClient.addValues(jsonObject,"alarmid",alarmid);
-            jsonObject = HedgeHttpClient.HedgeRequest("modify_alarm",jsonObject);
+            jsonObject = HedgeHttpClient.HedgeRequest("modify_alarm", jsonObject);
 
             alarmid_int = Integer.parseInt(alarmid);
            // HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "2"); //변경 로그 저장\
+            JSONObject jsonAU = new JSONObject();
+            HedgeHttpClient.addValues(jsonAU, "alarmid",alarmid);
+            HedgeHttpClient.addValues(jsonAU, "state","2");
+            jsonAU = HedgeHttpClient.HedgeRequest("insert_alarm_update", jsonAU);
         }
         else{
          //   alarmid = HedgeHttpClient.GetInstance().InsertAlarm(id, pw, hour, min, day, weather, alarm_type, on_off,
@@ -246,6 +250,10 @@ public class AlarmSetting extends NavigationActivity {
             alarmid = HedgeHttpClient.getValues(jsonObject,"alarmid");
             alarmid_int = Integer.parseInt(alarmid);
          //   HedgeHttpClient.GetInstance().InsertAlarmUpdate(id, pw, id, Integer.toString(alarmid_int), "1"); //변경 로그 저장\
+            JSONObject jsonAU = new JSONObject();
+            HedgeHttpClient.addValues(jsonAU, "alarmid",alarmid);
+            HedgeHttpClient.addValues(jsonAU, "state","1");
+            jsonAU = HedgeHttpClient.HedgeRequest("insert_alarm_update", jsonAU);
         }
         return alarmid_int;
     }

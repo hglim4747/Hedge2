@@ -1,17 +1,25 @@
 package hedge.johnny.Activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import hedge.johnny.HedgeMessage.QuickstartPreferences;
+import hedge.johnny.HedgeMessage.RegistrationIntentService;
 import hedge.johnny.HedgeObject.AlarmBackgroundService;
 import hedge.johnny.HedgeObject.HttpClient.HedgeHttpClient;
 import hedge.johnny.R;
@@ -21,6 +29,10 @@ import hedge.johnny.R;
  */
 public class InitialActivity extends Activity {
     Timer mTimer;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final String TAG = "MainActivity";
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +61,10 @@ public class InitialActivity extends Activity {
                         edit.putString("username", HedgeHttpClient.getValues(jsonObject, "username"));
                         edit.putString("phonenum", HedgeHttpClient.getValues(jsonObject, "phonenum"));
                         edit.commit();
+
+                        //디바이스 등록
+                        registDevice();
+
                         Intent i = new Intent(InitialActivity.this, MainActivity.class);
                         startActivity(i);
 
@@ -77,8 +93,61 @@ public class InitialActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_READY));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_GENERATING));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
+    }
+
+    private void registDevice(){
+        //registBroadcastReceiver
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                //토큰값이 들어옴 이걸 서버로 보냄
+                String token = intent.getStringExtra("token");
+            }
+        };
+
+        //getInstanceIdToken
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
+        }
+    }
+
+    @Override
     protected void onDestroy(){
         mTimer.cancel();
         super.onDestroy();
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }

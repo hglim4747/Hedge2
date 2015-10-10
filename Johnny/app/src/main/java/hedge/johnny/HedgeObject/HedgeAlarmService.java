@@ -10,16 +10,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import hedge.johnny.Activity.TimeoutActivity;
-import hedge.johnny.HedgeObject.HttpClient.HedgeHttpClient;
 
 /**
  * Created by EDGE01 on 2015-08-14.
  */
 public class HedgeAlarmService extends Service {
+    SharedPreferences pref;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        pref = getSharedPreferences("HedgeMembers", 0);
     }
 
     @Override
@@ -69,6 +71,16 @@ public class HedgeAlarmService extends Service {
                 break;
             }
         }
+
+        if(pref.getString("permission_onoff", "off") == "on")
+        {
+            String[] st,et;
+            st = pref.getString("permission_start", "PM/12:00").split("/");
+            et = pref.getString("permission_end", "PM/6:00").split("/");
+
+
+        }
+
 
         if(!repeat && day[today]){
             //반복하지 않으므로 해당 요일을 지운다.

@@ -103,6 +103,7 @@ public class HedgeAlarmService extends Service {
         Intent send = new Intent(this, TimeoutActivity.class);
         send.putExtra("weather_alarm", weather);
         send.putExtra("alarm_type", intent.getExtras().getString("alarm_type"));
+        send.putExtra("title", intent.getExtras().getString("title"));
         send.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(send);
     }

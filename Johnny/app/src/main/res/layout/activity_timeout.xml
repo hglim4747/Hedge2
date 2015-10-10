@@ -22,8 +22,8 @@
 
             <ImageView
                 android:background="@drawable/timeout_alarm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="200dp"
+                android:layout_height="190dp" />
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -34,7 +34,7 @@
                 <TextView
                     android:layout_gravity="center|bottom"
                     android:text="오전"
-                    android:textSize="35dp"
+                    android:textSize="30dp"
                     android:textColor="#fffcfeff"
                     android:layout_marginBottom="10dp"
                     android:layout_width="wrap_content"
@@ -46,7 +46,7 @@
                     android:textColor="#fffcfeff"
                     android:gravity="center"
                     android:layout_gravity="center"
-                    android:textSize="100dp"
+                    android:textSize="80dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
@@ -54,7 +54,7 @@
                     android:text=":"
                     android:gravity="center"
                     android:layout_gravity="center"
-                    android:textSize="90dp"
+                    android:textSize="60dp"
                     android:textColor="#fffcfeff"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"
@@ -67,12 +67,20 @@
                     android:gravity="center"
                     android:textColor="#fffcfeff"
                     android:layout_gravity="center"
-                    android:textSize="90dp"
+                    android:textSize="80dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/tNowMsg"
+                android:text="알람 문구"
+                android:textSize="30dp"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
         </LinearLayout> <!--lTimeBox-->
 
@@ -80,21 +88,18 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="center"
+            android:gravity="center_horizontal"
             android:orientation="vertical"> <!--lButtonBox-->
 
             <Button
                 android:background="@drawable/btn_end_alarm"
                 android:id="@+id/btn_end_alarm"
                 android:onClick="btnClickTimeOut"
-                android:height="70dp"
-                android:width="140dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="150dp"
+                android:layout_height="70dp" />
 
         </LinearLayout> <!--lButtonBox-->
 
     </LinearLayout> <!--lContainer-->
-
 
 </RelativeLayout>

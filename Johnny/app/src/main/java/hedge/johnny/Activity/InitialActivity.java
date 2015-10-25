@@ -97,8 +97,6 @@ public class InitialActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-
-
     }
 
     @Override
@@ -122,13 +120,6 @@ public class InitialActivity extends Activity {
                 jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("set_device_key",jsonObject);
             }
         };
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(QuickstartPreferences.REGISTRATION_READY));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(QuickstartPreferences.REGISTRATION_GENERATING));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
 
         //getInstanceIdToken
         if (checkPlayServices()) {

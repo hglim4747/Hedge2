@@ -40,6 +40,7 @@ public class InitialActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logo);
 
+
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -47,15 +48,15 @@ public class InitialActivity extends Activity {
                 SharedPreferences pref = getSharedPreferences("HedgeMembers", 0);
                 String id = pref.getString("userid", "");
                 String pw = pref.getString("password", "");
-                HedgeHttpClient.GetInstance().SetAccount(id,pw);
+                HedgeHttpClient.GetInstance().SetAccount(id, pw);
 
                 //if(true)
-                if(id.equals("")==false && pw.equals("")==false) //  저장된 아이디가 있음
+                if (id.equals("") == false && pw.equals("") == false) //  저장된 아이디가 있음
                 {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("ensure_member", jsonObject);
 
-                    if(HedgeHttpClient.getValues(jsonObject,"result").equals("1")) // 저장된 아이디가 로그인에 성공하면 메인액티비티로
+                    if (HedgeHttpClient.getValues(jsonObject, "result").equals("1")) // 저장된 아이디가 로그인에 성공하면 메인액티비티로
                     {
                         SharedPreferences.Editor edit = pref.edit();
                         edit.putString("username", HedgeHttpClient.getValues(jsonObject, "username"));
@@ -71,21 +72,22 @@ public class InitialActivity extends Activity {
                         Intent s = new Intent(InitialActivity.this, AlarmBackgroundService.class);
                         startService(s);
 
-                        finish(); return;
-                    }
-                    else // 저장된 아이디가 있으나 로그인에 실패하면 로그인시도
+                        finish();
+                        return;
+                    } else // 저장된 아이디가 있으나 로그인에 실패하면 로그인시도
                     {
                         Intent i = new Intent(InitialActivity.this, LoginActivity.class);
                         startActivity(i);
-                        finish(); return;
+                        finish();
+                        return;
                     }
 
-                }
-                else // 저장된 아이디가 없으면 로그인시도
+                } else // 저장된 아이디가 없으면 로그인시도
                 {
                     Intent i = new Intent(InitialActivity.this, LoginActivity.class);
                     startActivity(i);
-                    finish(); return;
+                    finish();
+                    return;
                 }
 
             }
@@ -114,11 +116,19 @@ public class InitialActivity extends Activity {
 
                 //토큰값이 들어옴 이걸 서버로 보냄
                 String token = intent.getStringExtra("token");
+                Log.e("id", token);
                 JSONObject jsonObject = new JSONObject();
                 HedgeHttpClient.addValues(jsonObject,"devicekey", token);
                 jsonObject = HedgeHttpClient.GetInstance().HedgeRequest("set_device_key",jsonObject);
             }
         };
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_READY));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_GENERATING));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
 
         //getInstanceIdToken
         if (checkPlayServices()) {

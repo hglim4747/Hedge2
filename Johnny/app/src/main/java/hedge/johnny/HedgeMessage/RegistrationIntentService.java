@@ -35,8 +35,8 @@ public class RegistrationIntentService extends IntentService {
     @SuppressLint("LongLogTag")
     @Override
     protected void onHandleIntent(Intent intent) {
-
         // GCM Instance ID의 토큰을 가져오는 작업이 시작되면 LocalBoardcast로 GENERATING 액션을 알려 ProgressBar가 동작하도록 한다.
+
         LocalBroadcastManager.getInstance(this)
                 .sendBroadcast(new Intent(QuickstartPreferences.REGISTRATION_GENERATING));
 

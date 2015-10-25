@@ -41,7 +41,6 @@ public class InitialActivity extends Activity {
         setContentView(R.layout.activity_logo);
 
 
-
         mTimer = new Timer();
         mTimer.schedule(new TimerTask() {
             @Override
@@ -93,6 +92,11 @@ public class InitialActivity extends Activity {
 
             }
         }, 1200);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
 
     }
@@ -128,8 +132,15 @@ public class InitialActivity extends Activity {
 
         //getInstanceIdToken
         if (checkPlayServices()) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter(QuickstartPreferences.REGISTRATION_READY));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter(QuickstartPreferences.REGISTRATION_GENERATING));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
+
             // Start IntentService to register this application with GCM.
-            Intent intent = new Intent(this, RegistrationIntentService.class);
+            Intent intent = new Intent(InitialActivity.this, RegistrationIntentService.class);
             startService(intent);
         }
     }

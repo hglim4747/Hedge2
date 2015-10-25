@@ -40,6 +40,7 @@ public class TimeoutActivity extends Activity implements OnInitListener {
     int user_volume = 0;
     AudioManager am;
     private boolean mWeatherAlarm;
+    private String mtitle;
 
     Timer timer = new Timer(true);
     float volume = 1.f;
@@ -62,6 +63,7 @@ public class TimeoutActivity extends Activity implements OnInitListener {
 
         Intent intent = getIntent(); // 값을 받아온다.
         mWeatherAlarm = intent.getBooleanExtra("weather_alarm", true);
+        mtitle = intent.getExtras().getString("title", "null");
 
         if(mWeatherAlarm)
             setContentView(R.layout.activity_timeout_weather);
@@ -191,34 +193,34 @@ public class TimeoutActivity extends Activity implements OnInitListener {
 
             SimpleDateFormat sdfHour = new SimpleDateFormat("hh");
             String strHour= sdfHour.format(date);
-
             nowTimeHour.setText(strHour);
 
             TextView nowTimeMinute = (TextView)findViewById(R.id.timeout_weather_minute);
-
             SimpleDateFormat sdfMinute = new SimpleDateFormat("mm");
             String strMinute= sdfMinute.format(date);
-
             nowTimeMinute.setText(strMinute);
+
+            TextView alarmTitle = (TextView)findViewById(R.id.timeout_weather_msg);
+            alarmTitle.setText(mtitle);
+
         }else{
             long now = System.currentTimeMillis();
             Date date = new Date(now);
 
             TextView nowTimeHour = (TextView)findViewById(R.id.tNowTimeHour);
-
             SimpleDateFormat sdfHour = new SimpleDateFormat("hh");
             String strHour= sdfHour.format(date);
-
             nowTimeHour.setText(strHour);
 
             TextView nowTimeMinute = (TextView)findViewById(R.id.tNowTimeMinute);
-
             SimpleDateFormat sdfMinute = new SimpleDateFormat("mm");
             String strMinute= sdfMinute.format(date);
-
             nowTimeMinute.setText(strMinute);
-        }
 
+            // 알람 문구
+            TextView alarmTitle = (TextView)findViewById(R.id.tNowMsg);
+            alarmTitle.setText(mtitle);
+        }
     }
 
     private void stopAlarm() {

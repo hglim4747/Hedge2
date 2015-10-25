@@ -104,6 +104,7 @@ public class AlarmBackgroundService extends Service implements Runnable{
         intent.putExtra("repeat", HedgeHttpClient.getValues(alarminfo,"repeating"));    //intent에 요일 on/off정보를 넣음.
         intent.putExtra("weather_alarm",HedgeHttpClient.getValues(alarminfo,"weather"));
         intent.putExtra("alarm_type", HedgeHttpClient.getValues(alarminfo,"alarm_type"));
+        intent.putExtra("title", HedgeHttpClient.getValues(alarminfo,"title"));
         intent.putExtra("db_id", alarmId);
 
         PendingIntent pender = PendingIntent.getService(this, Integer.parseInt(alarmId), intent, 0);
